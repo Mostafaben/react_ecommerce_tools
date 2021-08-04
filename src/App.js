@@ -1,13 +1,21 @@
 import React from "react"
+import { useDispatch, useSelector } from "react-redux"
 import style from "./app.module.css"
 import { IMAGES } from "./config/dummy_data"
+import { addPinAction, deletePinAction } from "./state/actions/pins_actions"
 
 function App() {
+	const items = useSelector((state) => state.pins)
+	const dispatch = useDispatch()
 	const [isAdding, setIsAdding] = React.useState(false)
-	const [items, setItems] = React.useState([])
 	const [isDeleting, setIsDeleting] = React.useState(false)
-	const [item, setItem] = React.useState(null)
-	const imageRef = React.useRef()
+	const [currentItem, setCurrentItem] = React.useState(null)
+	const [IMAGE_WIDTH, SET_IMAGE_WIDTH] = React.useState(null)
+	const imageRef = React.useRef(null)
+
+	React.useEffect(() => {
+		SET_IMAGE_WIDTH(imageRef.current.clientWidth)
+	}, [])
 
 	function addNewItem() {
 		setIsAdding(!isAdding)
@@ -24,25 +32,40 @@ function App() {
 			target: { clientWidth, clientHeight },
 			nativeEvent: { offsetX, offsetY },
 		} = e
-		setItem({
+		setCurrentItem({
 			x: (offsetX * 100) / clientWidth,
 			y: (offsetY * 100) / clientHeight,
 		})
 	}
 
 	function updateItems(newItem) {
-		setItem(null)
-		setItems([newItem, ...items])
+		setCurrentItem(null)
+		dispatch(addPinAction(newItem))
 		setIsAdding(false)
 	}
 
 	function cancelAddItem() {
 		setIsAdding(false)
-		setItem(null)
+		setCurrentItem(null)
 	}
+
 	function removeItem(index) {
 		if (!isDeleting) return
-		setItems([...items].filter((_, i) => index !== i))
+		dispatch(deletePinAction(items[index].id))
+	}
+
+	function listItems() {
+		return items.map((item, index) => (
+			<Pin
+				key={index}
+				position={{
+					x: (IMAGE_WIDTH * item.x) / 100,
+					y: (IMAGE_WIDTH * item.y) / 100,
+				}}
+				name={item.name}
+				onClick={() => removeItem(index)}
+			/>
+		))
 	}
 
 	return (
@@ -51,26 +74,24 @@ function App() {
 			style={{ cursor: isAdding ? "crosshair" : "unset" }}
 		>
 			<div className={style.actions}>
-				<button className={style.addButton} onClick={addNewItem}>
+				<button
+					className={style.addButton}
+					style={{ backgroundColor: "blue", color: "white" }}
+					onClick={addNewItem}
+				>
 					{isAdding ? "Done" : "Add new Item"}
 				</button>
-				<button className={style.addButton} onClick={removeItems}>
+				<button
+					className={style.addButton}
+					onClick={removeItems}
+					style={{ backgroundColor: "red", color: "white" }}
+				>
 					{isDeleting ? "Done" : "Remove Items"}
 				</button>
 			</div>
 
 			<div className={style.imageWrapper}>
-				{items.map((item, index) => (
-					<Pin
-						key={index}
-						position={{
-							x: (imageRef.current.clientWidth * item.x) / 100,
-							y: (imageRef.current.clientHeight * item.y) / 100,
-						}}
-						name={item.name}
-						onClick={() => removeItem(index)}
-					/>
-				))}
+				{listItems()}
 				<img
 					ref={imageRef}
 					src={IMAGES[0]}
@@ -79,7 +100,11 @@ function App() {
 					onClick={clickOnImage}
 				/>
 			</div>
-			<Dialog item={item} onCancel={cancelAddItem} onConfirm={updateItems} />
+			<Dialog
+				item={currentItem}
+				onCancel={cancelAddItem}
+				onConfirm={updateItems}
+			/>
 		</div>
 	)
 }

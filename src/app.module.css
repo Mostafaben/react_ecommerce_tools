@@ -1,13 +1,17 @@
 .mainContainer {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	height: 100vh;
+	width: 100%;
+	min-height: 100vh;
+}
+
+.pageContainer {
+	min-height: calc(100vh - 60px);
+	padding: 0px 16px;
+	position: relative;
 }
 
 .image {
 	width: min(400px, 100vw);
+	height: min(400px, 100vw);
 	object-fit: cover;
 }
 
@@ -18,11 +22,14 @@
 
 .imageWrapper {
 	position: relative;
+	overflow: hidden;
 }
 
 .dialogContainer {
 	width: 100vw;
 	height: 100vh;
+	top: 0;
+	left: 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -110,4 +117,49 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+.loginDialogContainer {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	right: 0;
+	top: 0;
+	min-height: 100vh;
+	width: min(100vw, 400px);
+	box-shadow: 2px 0px 10px #888;
+	background-color: white;
+	padding: 24px;
+	justify-content: center;
+	align-items: center;
+	z-index: 4;
+	animation: showDialog 400ms;
+}
+
+@keyframes showDialog {
+	0% {
+		transform: translateX(400px);
+	}
+}
+
+.loginDialogContainer input {
+	margin: 8px 0px;
+}
+
+.loginDialogContainer button {
+	margin: 8px 0px;
+	width: 100%;
+}
+
+.loginDialogContainer i {
+	position: absolute;
+	top: 24px;
+	right: 24px;
+	transition-duration: 400ms;
+	cursor: pointer;
+	font-size: 24px;
+}
+
+.loginDialogContainer i:hover {
+	transform: rotate(180deg);
 }
